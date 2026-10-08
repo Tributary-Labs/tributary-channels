@@ -1,4 +1,32 @@
-# Stellar-MicroPay: Streaming Payment Channels using Soroban
+# Tributary: Streaming Payment Channels using Soroban
+
+![CI](https://github.com/Tributary-Labs/tributary-channels/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![Stellar](https://img.shields.io/badge/Stellar-Soroban-7D00FF?logo=stellar&logoColor=white)
+
+## Table of Contents
+
+- [How it uses Stellar](#how-it-uses-stellar)
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Contract Structure](#contract-structure)
+- [Administration](#administration)
+- [Security Features](#security-features)
+- [Mathematical Calculations](#mathematical-calculations)
+- [Usage Examples](#usage-examples)
+- [Testing](#testing)
+- [Prerequisites](#prerequisites)
+- [Installation and Deployment](#installation-and-deployment)
+- [Acceptance Criteria Met](#acceptance-criteria-met)
+- [Technical Details](#technical-details)
+- [Documentation](#documentation)
+- [Contributors](#contributors)
+- [Environment variables](#environment-variables)
+
+## How it uses Stellar
+
+Tributary implements **streaming payment channels on Stellar** with **Soroban**: a payer deposits XLM into the contract and it streams to the recipient at a defined rate, claimable at any time. The contract, the API, and the web client all operate against Stellar Testnet.
 
 ## Overview
 
@@ -16,7 +44,7 @@ For an introduction to Stellar and Soroban terminology (such as stroops, ledgers
 
 ## Architecture
 
-Stellar-MicroPay is a three-tier Web3 application. The diagram below shows how the
+Tributary is a three-tier Web3 application. The diagram below shows how the
 pieces fit together, from the browser down to the Soroban contract on the Stellar
 network. A more detailed breakdown lives in [`docs/architecture.md`](docs/architecture.md).
 
@@ -157,7 +185,7 @@ for any claim schedule, which `test_close_stream_after_claims` and
 
 ### Opening a Stream
 ```rust
-let stream_id = StellarMicroPay::open_stream(
+let stream_id = StellarTributary::open_stream(
     &env,
     payer_address,
     recipient_address,
@@ -168,7 +196,7 @@ let stream_id = StellarMicroPay::open_stream(
 
 ### Claiming Funds
 ```rust
-let claimed = StellarMicroPay::claim_stream(
+let claimed = StellarTributary::claim_stream(
     &env,
     stream_id,
     recipient_address
@@ -177,7 +205,7 @@ let claimed = StellarMicroPay::claim_stream(
 
 ### Topping Up a Stream
 ```rust
-StellarMicroPay::top_up_stream(
+StellarTributary::top_up_stream(
     &env,
     stream_id,
     payer_address,
@@ -187,7 +215,7 @@ StellarMicroPay::top_up_stream(
 
 ### Closing a Stream
 ```rust
-let refund = StellarMicroPay::close_stream(
+let refund = StellarTributary::close_stream(
     &env,
     stream_id,
     payer_address
@@ -216,11 +244,19 @@ cargo test fuzz -- --nocapture
 ```
 
 The property tests replay saved counterexamples from
-`contracts/stellar-micropay-contract/proptest-regressions/lib.txt` before
+`contracts/stellar-tributary-contract/proptest-regressions/lib.txt` before
 generating new cases, so a bug found once stays covered.
 
 The wasm build is not exercised by `cargo test`; it requires stellar-cli
 v25.2.0+ (`stellar contract build`). CI runs the same check.
+
+## Prerequisites
+
+| Tool | Notes |
+| --- | --- |
+| **Rust + Stellar CLI** | for the Soroban contract |
+| **Node.js** | 20.19.5 (see `.nvmrc`) |
+| **Docker** | optional, for the full stack |
 
 ## Installation and Deployment
 
@@ -229,8 +265,8 @@ v25.2.0+ (`stellar contract build`). CI runs the same check.
 You can run the pre-built images from GitHub Container Registry:
 
 ```bash
-docker pull ghcr.io/emmy123222/stellar-micropay-backend:latest
-docker pull ghcr.io/emmy123222/stellar-micropay-frontend:latest
+docker pull ghcr.io/tributary-labs/stellar-tributary-backend:latest
+docker pull ghcr.io/tributary-labs/stellar-tributary-frontend:latest
 ```
 
 ### Manual Setup
@@ -268,12 +304,13 @@ docker pull ghcr.io/emmy123222/stellar-micropay-frontend:latest
 - [🤝 Contributing Guide](CONTRIBUTING.md) — Guidelines for contributing and setting up the development environment.
 - [🚀 Deployment Guide](DEPLOYMENT_GUIDE.md) — Instructions for deploying to production.
 - [📚 Technical Architecture & Docs](docs/) — Detailed documentation on architecture, Ledger hardware wallet support, Turrets, analytics, and APIs.
+
 ## Contributors
 
-Thanks to everyone who has contributed to Stellar-MicroPay! 🎉
+Thanks to everyone who has contributed to Tributary! 🎉
 
-<a href="https://github.com/Emmy123222/Stellar-MicroPay/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=Emmy123222/Stellar-MicroPay" alt="Contributors" />
+<a href="https://github.com/Tributary-Labs/Tributary/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=Tributary-Labs/Tributary" alt="Contributors" />
 </a>
 
 The contributor graph above is rendered by the [`contributors-img`](https://contributors-img.web.app)
@@ -282,7 +319,7 @@ to its GitHub profile.
 
 ### Thanks to
 
-- [@Emmy123222](https://github.com/Emmy123222)
+- [@Tributary-Labs](https://github.com/Tributary-Labs)
 - [@emmanuel](https://github.com/emmanuel)
 - [@iamTissan](https://github.com/iamTissan)
 - [@zeemscript](https://github.com/zeemscript)
@@ -303,8 +340,16 @@ to its GitHub profile.
 - [@Emelie-Dev](https://github.com/Emelie-Dev)
 - [@harystyleseze](https://github.com/harystyleseze)
 
-...and [all the other contributors](https://github.com/Emmy123222/Stellar-MicroPay/graphs/contributors)
+...and [all the other contributors](https://github.com/Tributary-Labs/Tributary/graphs/contributors)
 who have helped shape this project.
+
+## Environment variables
+
+Copy `.env.example` to `.env` and fill in your values (see the file for inline docs). Key groups:
+
+| Variable group | Key variables |
+| --- | --- |
+| Contract environment | see [`ENV.md`](ENV.md) for the full variable reference |
 
 ## License
 
