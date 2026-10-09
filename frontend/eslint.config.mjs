@@ -3,7 +3,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 
 export default defineConfig([
   ...nextVitals,
-  globalIgnores([".next/**", "out/**", "playwright-report/**", "test-results/**"]),
+  globalIgnores([".next/**", "out/**", "playwright-report/**", "test-results/**", "tailwind.config.ts"]),
   {
     rules: {
       "react-hooks/set-state-in-effect": "off",
