@@ -32,13 +32,44 @@ Stellar MicroPay is a three-tier Web3 application:
 └──────────────────────────┘       └──────────────────────────┘
                                               ▲
                                               │ Soroban
-                                   ┌──────────────────────────┐
-                                   │   Soroban Smart Contract │
-                                   │   (Rust/WASM)            │
-                                   │                          │
-                                   │  • Tip recording         │
-                                   │  • Escrow (v2.1)         │
-                                   └──────────────────────────┘
+┌──────────────────────────┐       ┌──────────────────────────┐
+│   Soroban Smart Contract │       │   Turrets Sidecar        │
+│   (Rust/WASM)            │       │   (Port 4100)            │
+│                          │       │                          │
+│  • Streaming payments    │◄─────►│  Off-chain Turrets       │
+│    (open/claim/top-up/   │       │  compute & signing       │
+│     close + pause/resume)│       └──────────────────────────┘
+│  • Escrow payments (v2.1)│
+│  • Milestone escrow with │       ┌──────────────────────────┐
+│    dispute timeout (v2.1)│       │   Redis Cache            │
+│  • Creator tipping       │       │   (Port 6379)            │
+│    (v1.4)                │       │                          │
+│  • Micro-transaction     │       │  Hot-path caching        │
+│    batching (v2.0)       │       └──────────────────────────┘
+│  • NFT payment receipts  │
+│    (v1.5)                │
+└──────────────────────────┘
+
+## Stream Lifecycle
+
+The streaming payment contract exposes a full lifecycle state machine
+(`contracts/stellar-micropay-contract/src/lib.rs`):
+
+1. **open** — sender initializes a stream to a recipient with a total
+   amount and duration; funds are locked in the contract escrow.
+2. **claim** — the recipient (or anyone on their behalf) withdraws the
+   vested amount accrued since the last claim, as often as desired.
+3. **top-up** — the sender adds funds to an existing stream, extending
+   either the duration or the per-second rate.
+4. **pause** — the sender temporarily halts vesting (dispute window).
+5. **resume** — vesting continues after a pause.
+6. **close** — either party ends the stream; unvested funds return to
+   the sender, vested funds remain claimable by the recipient.
+
+Escrow payments (ROADMAP v2.1) add milestone-based release with a
+dispute timeout on top of this lifecycle; creator tipping (v1.4),
+micro-transaction batching (v2.0) and NFT payment receipts (v1.5) are
+adjacent capabilities recorded in the same ledger.
 ```
 
 ## Payment Flow
