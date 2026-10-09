@@ -385,6 +385,7 @@ export default function Dashboard({ stellarURI }: DashboardProps) {
     if (!recentPaymentsForStats.length || !xlmBalance) return [];
 
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    // eslint-disable-next-line react-hooks/purity -- timestamp anchor is fixed per computation, not reactive state
     const now = Date.now();
     const thirtyDaysAgo = now - THIRTY_DAYS_MS;
 
