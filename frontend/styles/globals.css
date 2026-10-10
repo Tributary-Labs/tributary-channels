@@ -258,3 +258,13 @@
 @media (prefers-reduced-motion: reduce) {
   .confetti__piece { animation: none; opacity: 0; }
 }
+
+/* Keep page and drawer entrances still when the user requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-in {
+    animation: none;
+  }
+}
