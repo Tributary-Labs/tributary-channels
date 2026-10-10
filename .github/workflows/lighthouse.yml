@@ -1,0 +1,55 @@
+
+# .github/workflows/lighthouse-ci.yml
+name: Lighthouse CI
+on:
+  pull_request:
+    paths:
+      - frontend/**
+      - nginx/**
+      - docker-compose.prod.yml
+      - backend/src/server.js
+      - lighthouserc.json
+      - .github/workflows/lighthouse-ci.yml
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run build
+      - name: Copy frontend build to nginx html
+        run: |
+          mkdir -p nginx/html
+          cp -r out/* nginx/html/
+      - name: Start services with docker-compose
+        run: docker-compose -f docker-compose.prod.yml up -d
+      # We start the server manually because we need to test the actual served stack, not just the static export.
+      - name: Wait for backend and nginx to be ready
+        run: |
+          # Wait for nginx to respond
+          for i in {1..30}; do
+            if curl -s http://localhost > /dev/null; then
+              echo "Nginx is ready"
+              break
+            fi
+            echo "Waiting for nginx..."
+            sleep 2
+          done
+          # Wait for backend API (assuming health endpoint)
+          for i in {1..30}; do
+            if curl -s http://localhost/api/health > /dev/null; then
+              echo "Backend is ready"
+              break
+            fi
+            echo "Waiting for backend..."
+            sleep 2
+          done
+      - name: Run Lighthouse CI
+        run: npx lhci autorun
+      - name: Stop services
+        if: always()
+        run: docker-compose -f docker-compose.prod.yml down
